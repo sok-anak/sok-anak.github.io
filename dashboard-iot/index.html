@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Nexus IoT · Monitoring Dashboard</title>
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet" />
+  <!-- Font Awesome 6 -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+  <link rel="stylesheet" href="style.css">
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js">
+  </script>
+</head>
+<body>
+
+  <!-- ===== SIDEBAR ===== -->
+  <aside class="sidebar">
+    <div class="logo"><i class="fas fa-microchip"></i></div>
+    <nav>
+      <a href="#" class="active" data-page="dashboard"><i class="fas fa-chart-pie"></i></a>
+      <a href="#" data-page="devices"><i class="fas fa-wifi"></i></a>
+      <a href="#" data-page="sensors"><i class="fas fa-thermometer-half"></i></a>
+      <a href="#" data-page="energy"><i class="fas fa-bolt"></i></a>
+      <a href="#" data-page="alerts"><i class="fas fa-bell"><span class="badge" id="sidebarAlertBadge">3</span></i></a>
+      <a href="#" data-page="settings"><i class="fas fa-cog"></i></a>
+    </nav>
+    <div class="user-avatar">
+      JD
+      <span class="tooltip">rical · Admin</span>
+    </div>
+  </aside>
+
+  <!-- ===== MAIN ===== -->
+  <main class="main" id="mainContent">
+
+    <!-- TOPBAR -->
+    <header class="topbar">
+      <div class="greeting">
+        <h1>Hello, <span>rical</span> 👋</h1>
+        <p>
+          <span class="status-dot"></span>
+          <span id="connectionStatus">All systems operational</span> · <span id="deviceCount">12</span> devices online
+        </p>
+      </div>
+      <div class="actions">
+        <div class="date-time" id="liveDateTime">
+          <i class="far fa-calendar-alt"></i>
+          <span>Loading…</span>
+        </div>
+        <div class="notif" id="notifBell" title="Click to mark all as read">
+          <i class="far fa-bell"></i>
+          <span class="dot" id="notifDot"></span>
+        </div>
+      </div>
+    </header>
+
+    <!-- STATS ROW -->
+    <section class="stats-row" id="statsRow">
+      <div class="stat-card" data-stat="temperature">
+        <div class="icon blue"><i class="fas fa-thermometer-half"></i></div>
+        <div class="info">
+          <h3 id="tempStat">-- °C</h3>
+          <p>Temperature</p>
+          <span class="change up" id="tempChange"><i class="fas fa-arrow-up"></i> 0.0°</span>
+        </div>
+        <span class="click-hint">click for detail</span>
+      </div>
+      <div class="stat-card" data-stat="humidity">
+        <div class="icon green"><i class="fas fa-tint"></i></div>
+        <div class="info">
+          <h3 id="humidStat">-- %</h3>
+          <p>Humidity</p>
+          <span class="change down" id="humidChange"><i class="fas fa-arrow-down"></i> 0.0%</span>
+        </div>
+        <span class="click-hint">click for detail</span>
+      </div>
+      <div class="stat-card" data-stat="aqi">
+        <div class="icon purple"><i class="fas fa-wind"></i></div>
+        <div class="info">
+          <h3 id="aqiStat">--</h3>
+          <p>Air Quality</p>
+          <span class="change up" id="aqiChange"><i class="fas fa-arrow-up"></i> 0</span>
+        </div>
+        <span class="click-hint">click for detail</span>
+      </div>
+      <div class="stat-card" data-stat="power">
+        <div class="icon orange"><i class="fas fa-bolt"></i></div>
+        <div class="info">
+          <h3 id="powerStat">-- W</h3>
+          <p>Power Usage</p>
+          <span class="change down" id="powerChange"><i class="fas fa-arrow-down"></i> 0.0 kW</span>
+        </div>
+        <span class="click-hint">click for detail</span>
+      </div>
+      <div class="stat-card" data-stat="alerts">
+        <div class="icon red"><i class="fas fa-exclamation-triangle"></i></div>
+        <div class="info">
+          <h3 id="alertStat">0</h3>
+          <p>Active Alerts</p>
+          <span class="change down" id="alertChange"><i class="fas fa-check-circle"></i> All clear</span>
+        </div>
+        <span class="click-hint">click for detail</span>
+      </div>
+    </section>
+
+    <!-- CHARTS ROW -->
+    <section class="charts-row">
+      <div class="chart-box">
+        <div class="header">
+          <h4><i class="fas fa-chart-line"></i> Temperature Trend</h4>
+          <span class="tag">Last 24h</span>
+        </div>
+        <canvas id="tempChart"></canvas>
+      </div>
+      <div class="chart-box">
+        <div class="header">
+          <h4><i class="fas fa-chart-bar"></i> Humidity &amp; AQI</h4>
+          <span class="tag">Real-time</span>
+        </div>
+        <canvas id="humidChart"></canvas>
+      </div>
+    </section>
+
+    <!-- BOTTOM ROW -->
+    <section class="bottom-row">
+      <!-- SENSOR GRID -->
+      <div class="sensor-grid" id="sensorGrid">
+        <div class="sensor-item" data-sensor="temp">
+          <div class="top">
+            <span class="label"><i class="fas fa-thermometer-half" style="margin-right:6px;color:var(--accent-1);"></i>Temp</span>
+            <span class="status" id="sensorTempStatus">normal</span>
+          </div>
+          <div class="value" id="sensorTempValue">22.4 <small>°C</small></div>
+          <div class="bar"><div class="fill" id="sensorTempBar" style="width:62%;"></div></div>
+          <span class="click-hint">click for detail</span>
+        </div>
+        <div class="sensor-item" data-sensor="humidity">
+          <div class="top">
+            <span class="label"><i class="fas fa-tint" style="margin-right:6px;color:var(--accent-3);"></i>Humidity</span>
+            <span class="status" id="sensorHumidStatus">normal</span>
+          </div>
+          <div class="value" id="sensorHumidValue">58 <small>%</small></div>
+          <div class="bar"><div class="fill" id="sensorHumidBar" style="width:58%;"></div></div>
+          <span class="click-hint">click for detail</span>
+        </div>
+        <div class="sensor-item" data-sensor="aqi">
+          <div class="top">
+            <span class="label"><i class="fas fa-wind" style="margin-right:6px;color:var(--accent-2);"></i>Air Quality</span>
+            <span class="status warning" id="sensorAqiStatus">moderate</span>
+          </div>
+          <div class="value" id="sensorAqiValue">42 <small>AQI</small></div>
+          <div class="bar"><div class="fill" id="sensorAqiBar" style="width:42%;"></div></div>
+          <span class="click-hint">click for detail</span>
+        </div>
+        <div class="sensor-item" data-sensor="power">
+          <div class="top">
+            <span class="label"><i class="fas fa-bolt" style="margin-right:6px;color:var(--accent-5);"></i>Power</span>
+            <span class="status" id="sensorPowerStatus">normal</span>
+          </div>
+          <div class="value" id="sensorPowerValue">1.84 <small>kW</small></div>
+          <div class="bar"><div class="fill" id="sensorPowerBar" style="width:46%;"></div></div>
+          <span class="click-hint">click for detail</span>
+        </div>
+      </div>
+
+      <!-- ALERTS -->
+      <div class="alerts-box">
+        <div class="header">
+          <h4><i class="fas fa-bell"></i> Recent Alerts</h4>
+          <button class="see-all" id="viewAllAlerts">View all</button>
+        </div>
+        <div id="alertList">
+          <!-- script.js -->
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ===== MODAL ===== -->
+  <div class="modal-overlay" id="modalOverlay">
+    <div class="modal">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+        <h2 id="modalTitle"><i class="fas fa-info-circle"></i> Detail</h2>
+        <button class="close-btn" id="modalCloseBtn">&times;</button>
+      </div>
+      <div id="modalBody">
+        <p>Detail informasi akan muncul di sini.</p>
+      </div>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+
+</body>
+</html>
